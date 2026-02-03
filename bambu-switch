@@ -11,6 +11,8 @@ set -e
 SUPPORT_DIR="$HOME/Library/Application Support"
 BAMBU_LINK="$SUPPORT_DIR/BambuStudio"
 PROFILE_PREFIX="BambuStudio-"
+CONFIG_FILE="BambuStudio.conf"
+SYNC_RECENTS=true  # Set to false to disable recent files sync
 
 # Colors for output
 RED='\033[0;31m'
@@ -41,6 +43,45 @@ check_not_running() {
         print_error "BambuStudio is running. Please quit it first."
         exit 1
     fi
+}
+
+# Sync recent files between profiles using Python (for JSON parsing)
+sync_recent_files() {
+    local from_profile="$1"
+    local to_profile="$2"
+    
+    if [ "$SYNC_RECENTS" != "true" ]; then
+        return 0
+    fi
+    
+    local from_config="$SUPPORT_DIR/${PROFILE_PREFIX}${from_profile}/$CONFIG_FILE"
+    local to_config="$SUPPORT_DIR/${PROFILE_PREFIX}${to_profile}/$CONFIG_FILE"
+    
+    if [ ! -f "$from_config" ] || [ ! -f "$to_config" ]; then
+        return 0
+    fi
+    
+    # Use Python for reliable JSON manipulation
+    python3 << EOF 2>/dev/null || true
+import json
+
+try:
+    with open("$from_config", 'r') as f:
+        from_data = json.load(f)
+    with open("$to_config", 'r') as f:
+        to_data = json.load(f)
+    
+    # Copy recent files sections
+    if "recent" in from_data:
+        to_data["recent"] = from_data["recent"]
+    if "recent_projects" in from_data:
+        to_data["recent_projects"] = from_data["recent_projects"]
+    
+    with open("$to_config", 'w') as f:
+        json.dump(to_data, f, indent=4)
+except:
+    pass
+EOF
 }
 
 # Get the current active profile name
@@ -170,6 +211,12 @@ cmd_switch() {
     fi
     
     check_not_running
+    
+    # Sync recent files from current profile before switching
+    current=$(get_current_profile)
+    if [ -n "$current" ] && [ "$current" != "(none)" ] && [ "$current" != "(not managed - regular directory)" ]; then
+        sync_recent_files "$current" "$name"
+    fi
     
     # Remove existing symlink or backup existing directory
     if [ -L "$BAMBU_LINK" ]; then
