@@ -2,3 +2,18 @@
 *.swp
 *.swo
 *~
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+venv/
+.venv/
+env/
+.Python
+
+# py2app build artifacts
+app/build/
+app/dist/
+*.egg-info/

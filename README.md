@@ -1,20 +1,49 @@
 # bambu-switch
 
-A simple profile manager for Bambu Studio on macOS.
+A profile manager for Bambu Studio on macOS — available as both a **menu bar app** and a **command-line tool**.
 
 **Problem:** Bambu Lab doesn't support sharing devices between accounts or switching accounts easily. If you have printers on different accounts (e.g., home and work), you need to log out and back in with 2FA every time you switch.
 
 **Solution:** `bambu-switch` manages multiple Bambu Studio configuration profiles via symlinks. Each profile maintains its own login session, so you only need to authenticate once per profile.
 
+![Menu Bar Screenshot](docs/screenshot.png)
+
+## Features
+
+- 🖱️ **Menu bar app** — Click to switch profiles, no terminal needed
+- ⌨️ **CLI tool** — For power users and automation
+- 🔄 **Auto quit/launch** — Optionally closes and reopens BambuStudio when switching
+- 🚀 **Auto-start on login** — Always available in your menu bar
+- 📁 **Unlimited profiles** — Home, work, clients, whatever you need
+
+---
+
 ## Installation
 
-### Option 1: Homebrew (coming soon)
+### Menu Bar App (Recommended)
+
+#### Download Release (easiest)
+
+Download the latest `.app` from [Releases](https://github.com/yourusername/bambu-switch/releases) and drag to `/Applications`.
+
+#### Build from Source
 
 ```bash
-brew install bambu-switch
+# Clone the repo
+git clone https://github.com/yourusername/bambu-switch.git
+cd bambu-switch/app
+
+# Build the app
+./build.sh
+
+# Copy to Applications
+cp -r "dist/Bambu Switch.app" /Applications/
+
+# Optional: Enable auto-start on login
+./install-autostart.sh
 ```
 
-### Option 2: Manual Installation
+### Command-Line Tool
 
 ```bash
 # Clone the repo
@@ -30,22 +59,45 @@ mkdir -p ~/bin && cp bambu-switch ~/bin/
 export PATH="$HOME/bin:$PATH"
 ```
 
+---
+
 ## Quick Start
 
-```bash
-# First-time setup - migrates your existing config to a profile
-bambu-switch init
+### First-Time Setup
 
-# Create additional profiles
+If you have an existing BambuStudio installation, run the CLI to set up profiles:
+
+```bash
+bambu-switch init
+```
+
+This migrates your existing config to a profile called "default".
+
+### Using the Menu Bar App
+
+1. Click the Bambu Switch icon in your menu bar
+2. Select a profile to switch to
+3. If BambuStudio is running, you'll be prompted to close it
+4. After switching, optionally launch BambuStudio
+
+### Using the CLI
+
+```bash
+# Create profiles
 bambu-switch create work
-bambu-switch create office
+bambu-switch create home
 
 # Switch between profiles (quit BambuStudio first!)
 bambu-switch work      # Switch to work profile
 bambu-switch home      # Switch back to home
+
+# List all profiles
+bambu-switch list
 ```
 
-## Usage
+---
+
+## CLI Usage
 
 ```
 bambu-switch <command> [arguments]
