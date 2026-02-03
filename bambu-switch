@@ -38,11 +38,38 @@ print_warning() {
 }
 
 # Check if BambuStudio is running
-check_not_running() {
-    if pgrep -x "BambuStudio" > /dev/null; then
-        print_error "BambuStudio is running. Please quit it first."
-        exit 1
+is_bambu_running() {
+    pgrep -x "BambuStudio" > /dev/null
+}
+
+# Quit BambuStudio gracefully
+quit_bambu() {
+    if ! is_bambu_running; then
+        return 0
     fi
+    
+    print_info "Closing BambuStudio..."
+    osascript -e 'tell application "BambuStudio" to quit' 2>/dev/null || true
+    
+    # Wait for it to quit
+    for i in {1..10}; do
+        if ! is_bambu_running; then
+            return 0
+        fi
+        sleep 0.5
+    done
+    
+    # Force kill if still running
+    killall BambuStudio 2>/dev/null || true
+    sleep 0.5
+    
+    ! is_bambu_running
+}
+
+# Launch BambuStudio
+launch_bambu() {
+    print_info "Launching BambuStudio..."
+    open "/Applications/BambuStudio.app"
 }
 
 # Sync recent files between profiles using Python (for JSON parsing)
@@ -210,10 +237,25 @@ cmd_switch() {
         exit 1
     fi
     
-    check_not_running
+    # Check if already on this profile
+    current=$(get_current_profile)
+    if [ "$name" = "$current" ]; then
+        print_info "Already on profile '$name'"
+        if ! is_bambu_running; then
+            launch_bambu
+        fi
+        exit 0
+    fi
+    
+    # Auto-close BambuStudio if running
+    if is_bambu_running; then
+        if ! quit_bambu; then
+            print_error "Could not close BambuStudio. Please close it manually."
+            exit 1
+        fi
+    fi
     
     # Sync recent files from current profile before switching
-    current=$(get_current_profile)
     if [ -n "$current" ] && [ "$current" != "(none)" ] && [ "$current" != "(not managed - regular directory)" ]; then
         sync_recent_files "$current" "$name"
     fi
@@ -229,6 +271,9 @@ cmd_switch() {
     
     ln -s "$profile_dir" "$BAMBU_LINK"
     print_success "Switched to profile '$name'"
+    
+    # Auto-launch BambuStudio
+    launch_bambu
 }
 
 # Show current status
