@@ -1,0 +1,55 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Make script executable
+        run: chmod +x bamboo-switch
+
+      - name: Calculate SHA256
+        id: sha
+        run: |
+          SHA=$(shasum -a 256 bamboo-switch | cut -d' ' -f1)
+          echo "sha256=$SHA" >> $GITHUB_OUTPUT
+          echo "SHA256: $SHA"
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: bamboo-switch
+          generate_release_notes: true
+          body: |
+            ## Installation
+
+            ### Homebrew
+            ```bash
+            brew tap c0ryd/bamboo-switch
+            brew install bamboo-switch
+            ```
+
+            ### Manual
+            ```bash
+            curl -L https://github.com/c0ryd/bamboo-switch/releases/download/${{ github.ref_name }}/bamboo-switch -o bamboo-switch
+            chmod +x bamboo-switch
+            sudo mv bamboo-switch /usr/local/bin/
+            ```
+
+            ---
+
+            **SHA256:** `${{ steps.sha.outputs.sha256 }}`
+
+            ---
+
+            **Want a menu bar app?** Get [Bamboo Switch for Menu Bar](https://corydawson8.gumroad.com/l/qmriaz) - click to switch profiles without the terminal.

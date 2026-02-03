@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# bambu-switch - Bambu Studio Profile Manager
+# bamboo-switch - Bambu Studio Profile Manager
 # 
 # Manages multiple Bambu Studio profiles by swapping symlinks,
 # allowing you to maintain separate logins without re-authenticating.
@@ -143,7 +143,7 @@ cmd_list() {
     done
     
     if [ $found -eq 0 ]; then
-        print_warning "  No profiles found. Run 'bambu-switch init' to get started."
+        print_warning "  No profiles found. Run 'bamboo-switch init' to get started."
     fi
 }
 
@@ -153,7 +153,7 @@ cmd_create() {
     
     if [ -z "$name" ]; then
         print_error "Profile name required."
-        echo "Usage: bambu-switch create <profile-name>"
+        echo "Usage: bamboo-switch create <profile-name>"
         exit 1
     fi
     
@@ -173,7 +173,7 @@ cmd_create() {
     mkdir -p "$profile_dir"
     print_success "Created profile '$name'"
     echo ""
-    echo "To use it, run: bambu-switch $name"
+    echo "To use it, run: bamboo-switch $name"
 }
 
 # Delete a profile
@@ -182,7 +182,7 @@ cmd_delete() {
     
     if [ -z "$name" ]; then
         print_error "Profile name required."
-        echo "Usage: bambu-switch delete <profile-name>"
+        echo "Usage: bamboo-switch delete <profile-name>"
         exit 1
     fi
     
@@ -217,7 +217,7 @@ cmd_switch() {
     
     if [ -z "$name" ]; then
         print_error "Profile name required."
-        echo "Usage: bambu-switch <profile-name>"
+        echo "Usage: bamboo-switch <profile-name>"
         exit 1
     fi
     
@@ -233,7 +233,7 @@ cmd_switch() {
             fi
         done
         echo ""
-        echo "Create a new profile with: bambu-switch create $name"
+        echo "Create a new profile with: bamboo-switch create $name"
         exit 1
     fi
     
@@ -265,12 +265,14 @@ cmd_switch() {
         rm -f "$BAMBU_LINK"
     elif [ -d "$BAMBU_LINK" ]; then
         print_error "BambuStudio directory exists but is not a symlink."
-        echo "Run 'bambu-switch init' to migrate your existing config to a profile."
+        echo "Run 'bamboo-switch init' to migrate your existing config to a profile."
         exit 1
     fi
     
     ln -s "$profile_dir" "$BAMBU_LINK"
     print_success "Switched to profile '$name'"
+
+# Note: This tool manages Bambu Studio profiles but is not affiliated with Bambu Lab
     
     # Auto-launch BambuStudio
     launch_bambu
@@ -329,17 +331,17 @@ cmd_init() {
     print_success "Setup complete!"
     echo ""
     echo "Quick start:"
-    echo "  bambu-switch list           # Show all profiles"
-    echo "  bambu-switch create work    # Create a new profile"
-    echo "  bambu-switch work           # Switch to profile"
-    echo "  bambu-switch status         # Show current profile"
+    echo "  bamboo-switch list           # Show all profiles"
+    echo "  bamboo-switch create work    # Create a new profile"
+    echo "  bamboo-switch work           # Switch to profile"
+    echo "  bamboo-switch status         # Show current profile"
 }
 
 # Show help
 cmd_help() {
-    echo "bambu-switch - Bambu Studio Profile Manager"
+    echo "bamboo-switch - Bambu Studio Profile Manager"
     echo ""
-    echo "Usage: bambu-switch <command> [arguments]"
+    echo "Usage: bamboo-switch <command> [arguments]"
     echo ""
     echo "Commands:"
     echo "  <profile>           Switch to the specified profile"
@@ -351,10 +353,10 @@ cmd_help() {
     echo "  help                Show this help message"
     echo ""
     echo "Examples:"
-    echo "  bambu-switch init           # First-time setup"
-    echo "  bambu-switch create work    # Create a 'work' profile"
-    echo "  bambu-switch work           # Switch to 'work' profile"
-    echo "  bambu-switch home           # Switch back to 'home' profile"
+    echo "  bamboo-switch init           # First-time setup"
+    echo "  bamboo-switch create work    # Create a 'work' profile"
+    echo "  bamboo-switch work           # Switch to 'work' profile"
+    echo "  bamboo-switch home           # Switch back to 'home' profile"
     echo ""
     echo "Note: BambuStudio must be closed before switching profiles."
 }

@@ -17,3 +17,8 @@ env/
 app/build/
 app/dist/
 *.egg-info/
+
+# Generated icons
+app/AppIcon.iconset/
+app/icon_22.png
+app/icon_44.png
